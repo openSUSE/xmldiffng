@@ -22,10 +22,27 @@ def read(*names, **kwargs):
     ).read()
 
 
+def requires(filename):
+    """Returns a list of all pip requirements
+
+    :param filename: the Pip requirement file (usually 'requirements.txt')
+    :return: list of modules
+    :rtype: list
+    """
+    modules = []
+    with open(filename, 'r') as pipreq:
+        for line in pipreq:
+            line = line.strip()
+            if line.startswith('#') or not line:
+                continue
+            modules.append(line)
+    return modules
+
+
 setup(
     name='xmldiffng',
     version='0.1.0',
-    license='BSD',
+    license='GPL3',
     description='Diffing XML with RELAX NG schema',
     long_description='%s\n%s' % (
         re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.rst')),
@@ -41,37 +58,22 @@ setup(
     zip_safe=False,
     classifiers=[
         # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 1 - Planning',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Operating System :: Unix',
         'Operating System :: POSIX',
-        'Operating System :: Microsoft :: Windows',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: Implementation :: CPython',
-        'Programming Language :: Python :: Implementation :: PyPy',
-        # uncomment if you test on these interpreters:
-        # 'Programming Language :: Python :: Implementation :: IronPython',
-        # 'Programming Language :: Python :: Implementation :: Jython',
-        # 'Programming Language :: Python :: Implementation :: Stackless',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Utilities',
     ],
     keywords=[
-        # eg: 'keyword1', 'keyword2', 'keyword3',
+        'xml', 'diff',
     ],
-    install_requires=[
-        # eg: 'aspectlib==1.1.1', 'six>=1.7',
-    ],
-    extras_require={
-        # eg:
-        #   'rst': ['docutils>=0.11'],
-        #   ':python_version=="2.6"': ['argparse'],
-    },
+    install_requires=requires('requirements.txt'),
     entry_points={
         'console_scripts': [
             'xmldiffng = xmldiffng.cli:main',
