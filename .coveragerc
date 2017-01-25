@@ -1,0 +1,16 @@
+[paths]
+source =
+   src/xmldiffng
+   */site-packages/xmldiffng
+
+[run]
+branch = true
+source =
+    xmldiffng
+    tests
+parallel = true
+
+[report]
+show_missing = true
+precision = 2
+omit = *migrations*
