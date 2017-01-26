@@ -6,7 +6,7 @@ Overview
 
 |travis| |scrutinizer|
 
-.. |travis| image:: https://travis-ci.org/openSUSE/xmldiffng.svg?branch=master
+.. |travis| image:: https://travis-ci.org/openSUSE/xmldiffng.svg?branch=develop
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/openSUSE/xmldiffng
 
