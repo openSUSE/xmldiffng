@@ -14,6 +14,8 @@ from os.path import splitext
 from setuptools import find_packages
 from setuptools import setup
 
+HERE = dirname(__file__)
+
 
 def read(*names, **kwargs):
     return io.open(
@@ -73,7 +75,12 @@ setup(
     keywords=[
         'xml', 'diff',
     ],
-    install_requires=requires('requirements.txt'),
+    install_requires=requires(join(HERE, 'requirements.txt')),
+    #
+    # Testing:
+    setup_requires=['pytest-runner', ],
+    tests_require=['pytest', 'pytest-cov', 'pytest-catchlog'],
+    #
     entry_points={
         'console_scripts': [
             'xmldiffng = xmldiffng.cli:main',

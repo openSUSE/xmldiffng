@@ -1,39 +1,53 @@
 language: python
-python: '3.5'
+branches:
+  except:
+  - gh-pages
+
+matrix:
+    include:
+        - python: 2.7
+          env: TOXENV=check,2.7
+        - python: 3.4
+          env: TOXENV=check,3.4
+        - python: 3.5
+          env: TOXENV=check,3.5
+        - python: 3.6
+          env: TOXENV=check,3.6
+
+
 sudo: false
+
 env:
   global:
     - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
     - SEGFAULT_SIGNALS=all
-  matrix:
-    - TOXENV=check
-    - TOXENV=docs
 
-    - TOXENV=py27,report
-    - TOXENV=py33,report
-    - TOXENV=py34,report
-    - TOXENV=py35,report
-    - TOXENV=pypy,report
 before_install:
   - python --version
   - uname -a
   - lsb_release -a
+
 install:
-  - pip install tox
+  - pip install -r travis_requirements.txt
   - virtualenv --version
   - easy_install --version
   - pip --version
   - tox --version
+
 script:
-  - tox -v
+  - tox -v -e "${TOXENV}"
+
 after_failure:
   - more .tox/log/* | cat
   - more .tox/*/log/* | cat
+
 before_cache:
   - rm -rf $HOME/.cache/pip/log
+
 cache:
   directories:
     - $HOME/.cache/pip
+
 notifications:
   email:
     on_success: never
