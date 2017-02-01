@@ -2,6 +2,8 @@
 Overview
 ========
 
+Version |version|
+
 .. start-badges
 
 |travis| |scrutinizer|
