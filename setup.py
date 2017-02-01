@@ -43,7 +43,7 @@ def requires(filename):
 
 setup(
     name='xmldiffng',
-    version='0.1.0',
+    version='0.1.1',
     license='GPL3',
     description='Diffing XML with RELAX NG schema',
     long_description='%s\n%s' % (
