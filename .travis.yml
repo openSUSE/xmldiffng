@@ -6,13 +6,15 @@ branches:
 matrix:
     include:
         - python: 2.7
-          env: TOXENV=check,2.7
+          env: TOXENV=check
+        - python: 2.7
+          env: TOXENV=2.7
         - python: 3.4
-          env: TOXENV=check,3.4
+          env: TOXENV=3.4
         - python: 3.5
-          env: TOXENV=check,3.5
+          env: TOXENV=3.5
         - python: 3.6
-          env: TOXENV=check,3.6
+          env: TOXENV=3.6
 
 
 sudo: false
