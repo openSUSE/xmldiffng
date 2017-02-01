@@ -59,11 +59,11 @@ Setup a virtual python environment (VPE)
 
 #. Create a VPE::
 
-   pyvenv .env
+    pyvenv .env
 
 #. Activate the VPE::
 
-   source .env/bin/activate
+    source .env/bin/activate
 
 #. Install the project in develop-mode::
 
