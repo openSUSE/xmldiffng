@@ -1,5 +1,5 @@
-#
-#
+# See https://docs.python.org/2/distutils/sourcedist.html#the-manifest-in-template
+# for details
 #
 
 graft docs
@@ -11,6 +11,7 @@ graft tests
 exclude .bumpversion.cfg
 exclude .cookiecutterrc
 exclude tests/.coverage
+prune contrib
 
 include .coveragerc
 include .editorconfig
