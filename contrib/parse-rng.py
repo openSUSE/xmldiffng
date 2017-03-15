@@ -23,10 +23,25 @@ log.addHandler(handler)
 
 
 def hasattribute(node):
+    """Tests the current node, if it contains a <attribute> element
+    
+    :param node: the current node
+    :type node: :class:`lxml.etree._Element`
+    :return: True if the current node contains a a <attribute> element,
+             False otherwise
+    :rtype: bool
+    """
     return bool(node.xpath("rng:attribute", namespaces=NSMAP))
 
 
 def getattribute(node):
+    """Get the default attribute and value of the current node
+    
+    :param node: the current node
+    :type node: :class:`lxml.etree._Element`
+    :return: tuple of default attribute name and its value
+    :rtype: tuple
+    """
     attribute = node.find("rng:attribute", namespaces=NSMAP)
     # Maybe we should check, if attribute/name is available
     name = attribute.attrib.get('name')
@@ -40,7 +55,14 @@ def getattribute(node):
 
 
 def visitsingleref(ref, visited, definedict):
-    """
+    """Visit a single <ref/>
+    
+    :param ref: the current <ref/> node
+    :type ref: :class:`lxml.etree._Element`
+    :param visited: the set of visited references
+    :type visited: set
+    :param definedict: dictionary of all definition with maps from a name to the node
+    :type definedict: dict
     """
     refname = ref.attrib['name']
     # log.info( "   ref detected: %s", refname)
@@ -63,7 +85,13 @@ def visitsingleref(ref, visited, definedict):
 
 
 def visitrefs(element, definedict):
-    """
+    """Visit all <ref/> elements contained in the current element definition
+    
+    :param element: the current element node
+    :type element: :class:`lxml.etree._Element`
+    :param definedict: dictionary of all definition with maps from a name to the node
+    :type definedict: dict
+    
     """
     visited = set()
     attributes = list()
@@ -74,7 +102,13 @@ def visitrefs(element, definedict):
 
 
 def parserng(rngfilename):
-    """
+    """Read RNG file and return a dictionary in the format of
+       { 'element': [ (name1, value1), ...], }
+    
+     :param rngfilename: path to the RNG file (in XML format)
+     :type rngfilename: str
+     :return: result dictionary
+     :rtype: dict
     """
     rngtree = etree.parse(rngfilename)
     # Maybe there is a more efficient method:
