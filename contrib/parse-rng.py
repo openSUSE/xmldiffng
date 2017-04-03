@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 from lxml import etree
+import json
 import logging
 import sys
 
@@ -76,7 +77,7 @@ def visitsingleref(ref, visited, definedict):
     :type definedict: dict
     """
     refname = ref.attrib['name']
-    # log.info( "   ref detected: %s", refname)
+    log.info( "   ref detected: %s", refname)
     if refname in visited:
         return
     visited.add(refname)
@@ -109,13 +110,14 @@ def visitrefs(element, definedict):
     for ref in element.iter(RNGREF.text):
         attr = visitsingleref(ref, visited, definedict)
         attributes.append(attr)
+    log.info("visitrefs: %s", attributes)
     return attributes
 
 
 def parserng(rngfilename):
     """Read RNG file and return a dictionary in the format of
        { 'element': [ (name1, value1), ...], }
-    
+
      :param rngfilename: path to the RNG file (in XML format)
      :type rngfilename: str
      :return: result dictionary
@@ -126,7 +128,7 @@ def parserng(rngfilename):
     rngelements = rngtree.xpath("//rng:define[rng:element]", namespaces=NSMAP)
     alldefines = rngtree.xpath("//rng:define[not(rng:element)]", namespaces=NSMAP)
     definedict = {node.attrib['name']: node for node in alldefines}
-    
+
     elements = dict()
     for node in rngelements:
         element = getelementname(node)
@@ -136,12 +138,11 @@ def parserng(rngfilename):
             attr = visitrefs(node, definedict)
             elements[name] = attr
 
-    for element in rngelements:
-        log.info("Element definition: %s", element.attrib['name'])
-        attr = visitrefs(element, definedict)
-        elements[element.tag] = attr
+    #
+    #with open("rng.json", 'w') as fh:
+    #    json.dump(elements, fh)
     log.info("Result: %s", elements)
-        
+
 
 if __name__ == "__main__":
     try:
