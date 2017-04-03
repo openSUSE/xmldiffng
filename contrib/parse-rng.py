@@ -34,6 +34,17 @@ def hasattribute(node):
     return bool(node.xpath("rng:attribute", namespaces=NSMAP))
 
 
+def getelementname(node):
+    """Returns the element name from a define
+
+    :param node: the current node
+    :type node: :class:`lxml.etree._Element`
+    :return: string of element name
+    :rtype: str
+    """
+    return node.find("rng:element", namespaces=NSMAP)
+
+
 def getattribute(node):
     """Get the default attribute and value of the current node
     
@@ -117,6 +128,14 @@ def parserng(rngfilename):
     definedict = {node.attrib['name']: node for node in alldefines}
     
     elements = dict()
+    for node in rngelements:
+        element = getelementname(node)
+        if element is not None:
+            name = element.attrib.get('name')
+            log.info("Element definition: %s -> %s", node.attrib['name'], name)
+            attr = visitrefs(node, definedict)
+            elements[name] = attr
+
     for element in rngelements:
         log.info("Element definition: %s", element.attrib['name'])
         attr = visitrefs(element, definedict)
