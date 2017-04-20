@@ -67,7 +67,7 @@ class FmesCorrector:
                 'lang': 'de'
             },
             'para': {
-                'bar': 'test2'
+                'baz': 'test2'
             }
         }
         # algorithm parameters
@@ -84,7 +84,6 @@ class FmesCorrector:
         # add needed attribute (INORDER)
         _init_tree(tree1, map_attr=1)
         _init_tree(tree2)
-	# ich: einkommentierte print-Anweisungen
 	#print '**** TREE 2'
         #print node_repr(tree2)
         #print '**** TREE 1'
@@ -139,19 +138,16 @@ class FmesCorrector:
     def _match(self, lab_l1, lab_l2, equal):
         """do the actual matching"""
         d1, d2 = self._d1, self._d2
-	# ich: testausgabe
 	#print 'd1 aus match:'
 	#print d1
 	#print 'd2 aus match:'
 	#print d2
         mapping = self._mapping
-	# ich: testausgabe
 	print 'mapping aus match:'
 	print mapping
         # for each leaf label in both tree1 and tree2
         l = intersection(lab_l1.keys(), lab_l2.keys())
         # sort list to avoid differences between python version
-	# ich: testausgabe
 	#print 'l aus match:'
 	#print l
         l.sort()
@@ -313,7 +309,7 @@ class FmesCorrector:
                             next_node = None
                 else:
                     next_node = None
-                # ich: check if node is attribute node
+                # check if node is attribute node
                 print "Knoten ist %s" % node[N_TYPE]
                 print "if Knoten ist Attribut:"
                 if node[N_TYPE] == NT_ATTN:
@@ -325,21 +321,23 @@ class FmesCorrector:
                         print "      check if its value is the same as in the dictionary"
                         print "         Value in dictionary: %s" % self._getvalue(node[N_VALUE])
                         print "         Value in node: %s" % node[N_CHILDS][0][2]
-                        # ich: check if attribute node has the same value as in the dictionary (defaultValue)
+                        # check if attribute node has the same value as in the dictionary (defaultValue)
                         if self._getvalue(node[N_VALUE]) == node[N_CHILDS][0][2]:
-                            # do not delete
+                            # do not delete the node
                             print "-----Values are identical => skip delete-----\n"
                             node = next_node
                         else:
                             # delete the node
-                            self.add_action(['remove foo', f_xpath(node)])
+                            self.add_action(['remove', f_xpath(node)])
                             delete_node(node)
                             node = next_node
-#                    self.add_action(['remove foo', f_xpath(node)])
-#                    delete_node(node)
-#                    node = next_node
+                    else:
+                        # delete the node
+                        self.add_action(['remove', f_xpath(node)])
+                        delete_node(node)
+                        node = next_node
                 else:
-                    self.add_action(['remove foo', f_xpath(node)])
+                    self.add_action(['remove', f_xpath(node)])
                     delete_node(node)
                     node = next_node
             elif node[N_CHILDS]:
