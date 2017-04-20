@@ -61,11 +61,12 @@ def getattribute(node):
     if attrname is None:
         return
     log.debug ("   => Attribute found %r", attrname)
-    return attrname
-    #if DEFVALUE.text in attribute.attrib:
-    #    defaultvalue = attribute.attrib[DEFVALUE.text]
-    #    log.info("   default value %s", defaultvalue)
-    #    return (attrname, defaultvalue)
+    # HINT: Enable the following line, if you want _all_ attributes:
+    # return attrname
+    if DEFVALUE.text in attribute.attrib:
+        defaultvalue = attribute.attrib[DEFVALUE.text]
+        log.info("   default value %s->%r", attrname, defaultvalue)
+        return (attrname, defaultvalue)
 
 
 def visitsingleref(ref, define, visited, definedict):
@@ -79,7 +80,8 @@ def visitsingleref(ref, define, visited, definedict):
     :type visited: set
     :param definedict: dictionary of all definition with maps from a name to the node
     :type definedict: dict
-    :return:
+    :return: name of a found attribute or None
+    :rtype: str | None
     """
     refname = ref.attrib['name']
     log.debug("    ref %s visited=%s", refname, refname in visited)
@@ -98,6 +100,8 @@ def visitrefs(element, attributes, definedict):
     :type element: :class:`lxml.etree._Element`
     :param definedict: dictionary of all definition with maps from a name to the node
     :type definedict: dict
+    :return: list of all attributes
+    :rtype: list
     """
     visited = set()
     refs = list(element.iter(RNGREF.text))
@@ -169,7 +173,7 @@ def parserng(rngfilename, elementdef=None):
 
     with open("rng.json", 'w') as fh:
         json.dump(selements, fh)
-    log.info("Result: %s", elements)
+    # log.info("Result: %s", elements)
     # Pretty-print JSON, do:
     # $ cat rng.json | python3 -m json.tool
 
