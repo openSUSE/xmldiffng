@@ -60,7 +60,7 @@ def getattribute(node):
     # Special case for attributes with <anyName/>:
     if attrname is None:
         return
-    log.info ("   => Attribute found %r", attrname)
+    log.debug ("   => Attribute found %r", attrname)
     return attrname
     #if DEFVALUE.text in attribute.attrib:
     #    defaultvalue = attribute.attrib[DEFVALUE.text]
@@ -82,12 +82,12 @@ def visitsingleref(ref, define, visited, definedict):
     :return:
     """
     refname = ref.attrib['name']
-    log.info("    ref %s visited=%s", refname, refname in visited)
-    log.info("    define %s found", define.attrib.get('name'))
+    log.debug("    ref %s visited=%s", refname, refname in visited)
+    log.debug("    define %s found", define.attrib.get('name'))
 
     if hasattribute(define):
         # try to discover attribute
-        log.info("   Attribute node found %s", define.attrib.get('name'))
+        log.debug("   Attribute node found %s", define.attrib.get('name'))
         return getattribute(define)
 
 
@@ -101,10 +101,10 @@ def visitrefs(element, attributes, definedict):
     """
     visited = set()
     refs = list(element.iter(RNGREF.text))
-    log.info("Found %i refs: %s", len(refs), [r.attrib.get('name') for r in refs])
+    log.debug("Found %i refs: %s", len(refs), [r.attrib.get('name') for r in refs])
 
     for ref in element.iter(RNGREF.text):
-        log.info("  visit %s...", ref.attrib.get('name'))
+        log.debug("  visit %s...", ref.attrib.get('name'))
 
         refname = ref.attrib['name']
         define = definedict.get(refname)
@@ -115,7 +115,7 @@ def visitrefs(element, attributes, definedict):
             visited.add(refname)
             attr = visitsingleref(ref, define, visited, definedict)
             if attr:
-                log.info("  got %r attribute", attr)
+                log.debug("  got %r attribute", attr)
                 attributes.append(attr)
 
         result = visitrefs(define, attributes, definedict)
@@ -157,7 +157,7 @@ def parserng(rngfilename, elementdef=None):
             name = element.attrib.get('name')
             log.info("** Element definition: %s -> %s", node.attrib['name'], name)
             attr = visitrefs(node, attributes, definedict)
-            log.info("  ==> %s", attr)
+            log.info("  ==> Attributes: %s", attr)
             elements[name] = attr
             log.info("--------------------")
 
