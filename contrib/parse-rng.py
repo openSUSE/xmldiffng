@@ -17,7 +17,7 @@ DEFVALUE = etree.QName(NSMAP['a'], "defaultValue")
 # Logging stuff
 log = logging.getLogger('rngparser')
 log.setLevel(logging.INFO)
-formatter = logging.Formatter('[%(levelname)s] %(message)s')
+formatter = logging.Formatter('[%(levelname)-7s] %(message)s')
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
 log.addHandler(handler)
@@ -56,54 +56,42 @@ def getattribute(node):
     """
     attribute = node.find("rng:attribute", namespaces=NSMAP)
     # Maybe we should check, if attribute/name is available
-    name = attribute.attrib.get('name')
+    attrname = attribute.attrib.get('name')
     # Special case for attributes with <anyName/>:
-    if name is None:
+    if attrname is None:
         return
-    log.info ("   Attribute %s", name)
-    log.info("    --> all attribs: %s", attribute.attrib)
-    if DEFVALUE.text in attribute.attrib:
-        defaultvalue = attribute.attrib[DEFVALUE.text]
-        log.info("   default value %s", defaultvalue)
-        return (name, defaultvalue)
+    log.info ("   => Attribute found %r", attrname)
+    return attrname
+    #if DEFVALUE.text in attribute.attrib:
+    #    defaultvalue = attribute.attrib[DEFVALUE.text]
+    #    log.info("   default value %s", defaultvalue)
+    #    return (attrname, defaultvalue)
 
 
-def visitsingleref(ref, visited, definedict):
-    """Visit a single <ref/>
+def visitsingleref(ref, define, visited, definedict):
+    """Visit a single <ref/> and follow it through the <attribute> node
 
     :param ref: the current <ref/> node
     :type ref: :class:`lxml.etree._Element`
+    :param define: the node pointing to the <define>
+    :type define: :class:`lxml.etree._Element`
     :param visited: the set of visited references
     :type visited: set
     :param definedict: dictionary of all definition with maps from a name to the node
     :type definedict: dict
+    :return:
     """
     refname = ref.attrib['name']
-    log.info("   ref detected: %s", refname)
-    log.info("   ref in visited? %s", refname in visited)
-    if refname in visited:
-        return refname
-    visited.add(refname)
-    # define = ref.getroot().xpath("//rng:define[@name=%s" % refname, namespaces=NSMAP)
-    define = definedict.get(refname)
-    if define is not None:
-        log.info("   define in ref: %s -> %s", define, define.attrib.get('name'))
-    else:
-        # log.warning("   Name %s return None", refname)
-        # Really?
-        return
-    log.debug(">     %s", visited)
+    log.info("    ref %s visited=%s", refname, refname in visited)
+    log.info("    define %s found", define.attrib.get('name'))
+
     if hasattribute(define):
         # try to discover attribute
         log.info("   Attribute node found %s", define.attrib.get('name'))
         return getattribute(define)
 
-    for r in define.iter(RNGREF.text):
-        log.info("   ref: %s" % r.attrib['name'])
-        return visitsingleref(r, visited, definedict)
 
-
-def visitrefs(element, definedict):
+def visitrefs(element, attributes, definedict):
     """Visit all <ref/> elements contained in the current element definition
 
     :param element: the current element node
@@ -112,19 +100,32 @@ def visitrefs(element, definedict):
     :type definedict: dict
     """
     visited = set()
-    attributes = list()
     refs = list(element.iter(RNGREF.text))
-    log.info(" Found %i refs: %s", len(refs), [r.attrib.get('name') for r in refs])
+    log.info("Found %i refs: %s", len(refs), [r.attrib.get('name') for r in refs])
+
     for ref in element.iter(RNGREF.text):
-        log.info("    visit %s...", ref.attrib.get('name'))
-        attr = visitsingleref(ref, visited, definedict)
-        if attr is not None:
-            attributes.append(attr)
-    log.info("   visitrefs: %s", attributes)
+        log.info("  visit %s...", ref.attrib.get('name'))
+
+        refname = ref.attrib['name']
+        define = definedict.get(refname)
+        if define is None:
+            continue
+
+        if refname not in visited:
+            visited.add(refname)
+            attr = visitsingleref(ref, define, visited, definedict)
+            if attr:
+                log.info("  got %r attribute", attr)
+                attributes.append(attr)
+
+        result = visitrefs(define, attributes, definedict)
+        if not result:
+            attributes.extend(result)
+
     return attributes
 
 
-def parserng(rngfilename):
+def parserng(rngfilename, elementdef=None):
     """Read RNG file and return a dictionary in the format of
        { 'element': [ (name1, value1), ...], }
 
@@ -139,13 +140,24 @@ def parserng(rngfilename):
     alldefines = rngtree.xpath("//rng:define[not(rng:element)]", namespaces=NSMAP)
     definedict = {node.attrib['name']: node for node in alldefines}
 
+    if elementdef is not None:
+        node = rngtree.find("//rng:define[rng:element][@name='%s']" % elementdef,
+                            namespaces=NSMAP)
+        if node is None:
+            log.error("Could not find %r in %s", elementdef, rngfilename)
+            sys.exit(10)
+
+        rngelements = [node]
+
     elements = dict()
     for node in rngelements:
+        attributes = list()
         element = getelementname(node)
         if element is not None:
             name = element.attrib.get('name')
-            log.info("Element definition: %s -> %s", node.attrib['name'], name)
-            attr = visitrefs(node, definedict)
+            log.info("** Element definition: %s -> %s", node.attrib['name'], name)
+            attr = visitrefs(node, attributes, definedict)
+            log.info("  ==> %s", attr)
             elements[name] = attr
             log.info("--------------------")
 
@@ -157,7 +169,11 @@ def parserng(rngfilename):
 
 if __name__ == "__main__":
     try:
-        parserng(sys.argv[1])
+        try:
+            elementdef = sys.argv[2]
+        except:
+            elementdef = None
+        parserng(sys.argv[1], elementdef)
     except IndexError:
         log.error("Expect an RNG schema")
         sys.exit(10)
