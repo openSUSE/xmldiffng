@@ -162,9 +162,16 @@ def parserng(rngfilename, elementdef=None):
             log.info("--------------------")
 
     #
-    #with open("rng.json", 'w') as fh:
-    #    json.dump(elements, fh)
-    # log.info("Result: %s", elements)
+    from collections import OrderedDict
+    selem = OrderedDict()
+    selements = OrderedDict((key, elements[key])
+                            for key in sorted(elements.keys()))
+
+    with open("rng.json", 'w') as fh:
+        json.dump(selements, fh)
+    log.info("Result: %s", elements)
+    # Pretty-print JSON, do:
+    # $ cat rng.json | python3 -m json.tool
 
 
 if __name__ == "__main__":
