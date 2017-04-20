@@ -11,6 +11,7 @@ NSMAP = dict(rng="http://relaxng.org/ns/structure/1.0",
              a="http://relaxng.org/ns/compatibility/annotations/1.0",
              )
 
+RNGATTRIBUTE = etree.QName(NSMAP['rng'], "attribute")
 RNGREF = etree.QName(NSMAP['rng'], "ref")
 DEFVALUE = etree.QName(NSMAP['a'], "defaultValue")
 
@@ -46,15 +47,16 @@ def getelementname(node):
     return node.find("rng:element", namespaces=NSMAP)
 
 
-def getattribute(node):
-    """Get the default attribute and value of the current node
+def getsingleattribute(attribute):
+    """Get the single default attribute and value of the current
+       define node
 
-    :param node: the current node
+    :param node: the current define node
     :type node: :class:`lxml.etree._Element`
     :return: tuple of default attribute name and its value
     :rtype: tuple
     """
-    attribute = node.find("rng:attribute", namespaces=NSMAP)
+    # attribute = node.find("rng:attribute", namespaces=NSMAP)
     # Maybe we should check, if attribute/name is available
     attrname = attribute.attrib.get('name')
     # Special case for attributes with <anyName/>:
@@ -67,6 +69,23 @@ def getattribute(node):
         defaultvalue = attribute.attrib[DEFVALUE.text]
         log.info("   default value %s->%r", attrname, defaultvalue)
         return (attrname, defaultvalue)
+
+
+def getattributes(node):
+    """Get the all default attributes from the current define node
+
+    :param node: the current define node
+    :type node: :class:`lxml.etree._Element`
+    :return: list of tuples of default attribute name and its value
+    :rtype: list
+    """
+    result = []
+    for attribute in node.iter(RNGATTRIBUTE.text):
+        log.debug("   see %s", attribute.attrib.get('name'))
+        x = getsingleattribute(attribute)
+        if x:
+            result.append(x)
+    return result
 
 
 def visitsingleref(ref, define, visited, definedict):
@@ -90,7 +109,7 @@ def visitsingleref(ref, define, visited, definedict):
     if hasattribute(define):
         # try to discover attribute
         log.debug("   Attribute node found %s", define.attrib.get('name'))
-        return getattribute(define)
+        return getattributes(define)
 
 
 def visitrefs(element, attributes, definedict):
@@ -114,6 +133,10 @@ def visitrefs(element, attributes, definedict):
         define = definedict.get(refname)
         if define is None:
             continue
+
+        result = getattributes(define)
+        if result:
+            attributes.extend(result)
 
         if refname not in visited:
             visited.add(refname)
