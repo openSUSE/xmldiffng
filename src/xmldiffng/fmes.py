@@ -32,10 +32,13 @@ from xmldiff.misc import intersection, in_ref, index_ref
 # c extensions
 from xmldiff.maplookup import has_couple , partner, fmes_init, \
      fmes_node_equal, match_end, fmes_end
+# json for RNG parsinig
+import json
 
 # node's attributes for fmes algorithm
 N_INORDER = NSIZE
 N_MAPPED = N_INORDER + 1
+
 
 def _init_tree(tree, map_attr=None):
     """ recursively append N_INORDER attribute to tree
@@ -56,7 +59,11 @@ class FmesCorrector:
     """
     
     def __init__(self, formatter, rngdict=None, f=0.6, t=0.5): # f=0,59
-        self.rngdict = {
+        rngjson = '/suse/fweiss/Documents/werkstudent/bachelorarbeit/xmldiffng/contrib/rng.json'
+        #self.rngdict = json.load(open('rng.json', 'r'))
+        self.rngdict = json.load(open(rngjson, 'r'))
+        """
+            rngdict = {
             'book': {
                 'version': '2017'
             },
@@ -70,6 +77,7 @@ class FmesCorrector:
                 'baz': 'test2'
             }
         }
+        """
         # algorithm parameters
         if f>1 or f<0 or t>1 or t<0.5:
             raise Exception('Invalid parameters:  1 > f > 0 and 1 > t > 0.5')
@@ -380,7 +388,8 @@ class FmesCorrector:
         :param rngkey: key to search for
         :return: True or False
         """
-        return any([rngkey in value.keys() for _, value in self.rngdict.iteritems()])
+        #return any([rngkey in value.keys() for _, value in self.rngdict.iteritems()])
+        return any([rngkey in value for _, value in self.rngdict.iteritems()])
 #        for key, value in self.rngdict.iteritems():
 #            if rngkey in value.keys():
 #                return True
