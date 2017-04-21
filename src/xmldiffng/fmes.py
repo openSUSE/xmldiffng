@@ -60,10 +60,16 @@ class FmesCorrector:
     
     def __init__(self, formatter, rngdict=None, f=0.6, t=0.5): # f=0,59
         rngjson = '/suse/fweiss/Documents/werkstudent/bachelorarbeit/xmldiffng/contrib/rng.json'
-        #self.rngdict = json.load(open('rng.json', 'r'))
         self.rngdict = json.load(open(rngjson, 'r'))
+
+        for key in self.rngdict:
+            value = self.rngdict[key]
+            if value is None:
+                self.rngdict[key] = dict()
+            else:
+                self.rngdict[key] = dict(value)
         """
-            rngdict = {
+        self.rngdict ={
             'book': {
                 'version': '2017'
             },
@@ -246,14 +252,23 @@ class FmesCorrector:
                             self.add_action(action)
                         # node is attribute node
                         elif w[N_TYPE] == NT_ATTN:
-                            print "w is attribute node => check if it is in the dictionary..."
+                            print "%s is attribute node => check if it is in the dictionary..." % w[N_VALUE]
                             if self._searchkey(w[N_VALUE]):
                                 print "   yes, -%s- is in the dictionary" % w[NT_ATTN]
                                 print "      Value in dictionary: %s" % self._getvalue(w[N_VALUE])
-                                print "      Value in node: %s" % w[N_CHILDS]
-                                # do not insert the node
-                                print "-----Values are identical => skip insert-----\n"
+                                print "      Value in node: %s" % x[N_CHILDS][0][2]
+                                if self._getvalue(w[N_VALUE]) != x[N_CHILDS][0][2]:
+                                    # values are different => insert the node
+                                    print "x != default"
+                                    action = ['append BLA', f_xpath(z), ww]
+                                    self.add_action(action)
+
+                                else:
+                                    # do not insert the node
+                                    print "-----Values are identical => skip insert-----\n"
                             else:
+                                print "insert/append attribute %s" % w[N_VALUE]
+                                #print "value of attribute: %s" % self._getvalue(w[N_VALUE])
                                 action = ['append BLA', f_xpath(z), ww]
                                 self.add_action(action)
                         elif z[N_TYPE] == NT_ROOT:
@@ -351,6 +366,10 @@ class FmesCorrector:
                         if self._getvalue(node[N_VALUE]) == node[N_CHILDS][0][2]:
                             # do not delete the node
                             print "-----Values are identical => skip delete-----\n"
+                            #print "#### next: %s" %next_node
+                            # delete node in order to get the correct next node (if one node has
+                            # two attributes and one gets deleted, the next node will be itself again...)
+                            delete_node(node)
                             node = next_node
                         else:
                             # delete the node
