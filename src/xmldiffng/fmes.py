@@ -211,7 +211,8 @@ class FmesCorrector:
                                 # if not w[N_CHILDS][0]:
                                 delete_node(w[N_CHILDS][0])
                             break
-                        
+
+                    #-----------------------
                 if todo is not None:
                     x[N_INORDER] = TRUE
                     k = fp(x)
@@ -230,23 +231,40 @@ class FmesCorrector:
                     ww[N_CHILDS] = []
                     # preformat action
                     if not self._dict.has_key(id(z)):
+                        print "Knoten x ist: %s" % x[N_TYPE]
+                        print "Knoten w ist %s" % w[N_TYPE]
                         if w[N_TYPE] == NT_ATTV:
                             action = ['update', f_xpath(z), w[N_VALUE]]
+                            self.add_action(action)
+                        # node is attribute node
                         elif w[N_TYPE] == NT_ATTN:
-                            action = ['append', f_xpath(z), ww]
+                            print "w is attribute node => check if it is in the dictionary..."
+                            if self._searchkey(w[N_VALUE]):
+                                print "   yes, -%s- is in the dictionary" % w[NT_ATTN]
+                                print "      Value in dictionary: %s" % self._getvalue(w[N_VALUE])
+                                print "      Value in node: %s" % w[N_CHILDS]
+                                # do not insert the node
+                                print "-----Values are identical => skip insert-----\n"
+                            else:
+                                action = ['append BLA', f_xpath(z), ww]
+                                self.add_action(action)
                         elif z[N_TYPE] == NT_ROOT:
                             action = ['append-first', '/', ww]
+                            self.add_action(action)
                         else:
                             k = get_pos(w)
                             if k <= nb_attrs(z):
                                 action = ['append-first',
                                           f_xpath(z), ww]
+                                self.add_action(action)
                             else:
                                 action = ['insert-after',
                                           f_xpath(z[N_CHILDS][k-1]), ww]
-                        self.add_action(action)
+                                self.add_action(action)
+                        #self.add_action(action)
                     else:
                         insert_node(self._dict[id(z)], ww, k)
+                    #-----------------------
             elif x[N_NAME] != '/':
                 v = w[N_PARENT]
                 # update
@@ -337,6 +355,7 @@ class FmesCorrector:
                         delete_node(node)
                         node = next_node
                 else:
+                    print "perform delete operation on node %s" % node[NT_ATTN]
                     self.add_action(['remove', f_xpath(node)])
                     delete_node(node)
                     node = next_node
