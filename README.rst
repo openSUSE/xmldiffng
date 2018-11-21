@@ -14,7 +14,7 @@ Version |version|
 
 .. |scrutinizer| image:: https://scrutinizer-ci.com/g/openSUSE/xmldiffng/badges/quality-score.png?b=develop
     :alt: Scrutinizer Build Status
-    :target: https://scrutinizer-ci.com/g/openSUSE/xmldiffng/
+    :target: https://scrutinizer-ci.com/g/openSUSE/xmldiffng
 
 .. end-badges
 
@@ -44,14 +44,14 @@ Optional but recommended Tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * `gitprompt <https://github.com/magicmonty/bash-git-prompt>`_
-* `GitFlow <https://github.com/petervanderdoes/gitflow)>`_
+* `GitFlow <https://github.com/petervanderdoes/gitflow-avh>`_
 
 Install required packages (SUSE)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 As a requirement, install the following packages for openSUSE::
 
-    sudo zypper install libxml2-devel libxml2-tool libxslt-devel gcc-c++ make
+    sudo zypper install libxml2-devel libxml2-tools libxslt-devel gcc-c++ make
     sudo zypper install readline-devel python-devel python3-devel python-virtualenv
 
 Setup a virtual python environment (VPE)
@@ -59,7 +59,7 @@ Setup a virtual python environment (VPE)
 
 #. Create a VPE::
 
-    pyvenv .env
+    python3 -m venv .env
 
 #. Activate the VPE::
 
@@ -75,7 +75,7 @@ Some helpful commands:
 
     pip list
 
-* Install python modules from `PyPI <https://pypi.python.org/pypi>`_::
+* Install python modules from `PyPI <https://pypi.org>`_::
 
     pip install MODULE
 
